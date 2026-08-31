@@ -1,1 +1,1 @@
-# python_fullstack1
+create env: python3 -m venv env

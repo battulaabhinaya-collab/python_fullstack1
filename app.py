@@ -1,6 +1,21 @@
-from flask import Flask, render_template
+from flask import Flask, render_template,request,redirect,url_for,jsonify,session
+import sqlite3
 
 app=Flask(__name__)
+
+app.secret_key="super_secret_key"
+
+def get_db_connection():
+    conn=sqlite3.connect("database.db")
+    conn.row_factory=sqlite3.Row
+    return conn
+def init_db():
+    conn=get_db_connection()
+    cursor=conn.cursor()
+    cursor.execute("CREATE TABLE IF NOT EXISTS USERS(id INTEGER PRIMARY KEY AUTOINCREMENT,name TEXT NOT NULL,email TEXT NOT NULL,PASSWOARD TEXT NOT NULL,dob TEXT NOT NULL,gender TEXT NOT NULL,courses TEXT NOT NULL)")
+    conn.commit()
+    conn.close()
+init_db()
 
 @app.route("/")
 def home():  
@@ -29,6 +44,14 @@ def login():
 @app.route("/trainers")
 def trainers():
     return render_template("trainers.html")
+@app.route("/api/register", methods=["POST"])
+def api_register():
+    data=request.get_json()
+    email=data.get("email")
+    conn=get_db_connection()
+    cursor=conn.cursor()
+    cursor.execute("SELECT*FROM user WHERE email=?",(email,))
+    existing_user=cursor.fetchone
     
 
 if __name__=="__main__":

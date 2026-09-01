@@ -64,8 +64,6 @@ def api_register():
         cursor=conn.cursor()
         courses.execute("INSERT INTO users(name,mail,dob,gender,courses)VALUES (?, ?, ?, ?, ?, ?)", (name, email, password, dob, gender, courses))
         conn.commit()
-        conn.close()")
-        conn.commit()
         conn.close()
         return jsonify({"message":"user registered sucessfully "}),201
     

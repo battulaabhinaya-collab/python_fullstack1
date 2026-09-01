@@ -56,6 +56,18 @@ def api_register():
         conn.close()
         return jsonify({"message":"Email already registerd"}),400
         name=data.get("name")
+        password=data.get("passwoard")
+        dob=data.get("dob")
+        gender=data.get("gender")
+        courses=data.get("courses")
+        conn=get_db_connection()
+        cursor=conn.cursor()
+        courses.execute("INSERT INTO users(name,mail,dob,gender,courses)VALUES (?, ?, ?, ?, ?, ?)", (name, email, password, dob, gender, courses))
+        conn.commit()
+        conn.close()")
+        conn.commit()
+        conn.close()
+        return jsonify({"message":"user registered sucessfully "}),201
     
 
 if __name__=="__main__":

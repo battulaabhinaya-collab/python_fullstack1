@@ -51,7 +51,11 @@ def api_register():
     conn=get_db_connection()
     cursor=conn.cursor()
     cursor.execute("SELECT*FROM user WHERE email=?",(email,))
-    existing_user=cursor.fetchone
+    existing_user=cursor.fetchone()
+    if existing_user:
+        conn.close()
+        return jsonify({"message":"Email already registerd"}),400
+        name=data.get("name")
     
 
 if __name__=="__main__":

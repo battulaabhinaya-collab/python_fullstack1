@@ -66,6 +66,24 @@ def api_register():
         conn.commit()
         conn.close()
         return jsonify({"message":"user registered sucessfully "}),201
+@app.route("/api/login",methods=["POST"])
+def api_login():
+    data=request.get_json()
+    email=data.get("email")
+    passwoard=data.get("password")
+    conn=get_db_connection()
+    cursor=conn.cursor()
+    cursor.execute("SELECT * FROM users WHERE email=? AND Password=?",(email,password))
+    user=cursor.fetchone()
+    conn.close()
+    if user:
+        session["user_id"]=user["id"]
+        session["user_name"]=user["name"]
+        session["user_email"]=user["email"]
+        return jsonify({"message": "Login successful"}), 200
+    else:
+        return jsonify({"message": "Invalid email or password"}), 401
+    
     
 
 if __name__=="__main__":

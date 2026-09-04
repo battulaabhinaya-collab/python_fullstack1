@@ -104,6 +104,44 @@ def api_tasks():
     tasks=cursor.fetchall()
     conn.close()
     return jsonify([dict(task) for task in tasks]), 200
+@app.route("/api/tasks", methods=["POST"])
+def api_create_task():
+    data=request.get_json()
+    title=data.get("title")
+    description=data.get("description")
+    status=data.get("status")
+    conn=get_db_connection()
+    cursor=conn.cursor()
+    cursor.execute(
+        "INSERT INTO tasks (title, description, status) VALUES (?, ?, 'pending')", (title, description)
+    )
+    conn.commit()
+    conn.close()
+    return jsonify({"message": "Task added successfully"}), 201
+
+@app.route("/api/tasks/<int:task_id>", methods=["DELETE"])
+def api_delete_task(task_id):
+    conn=get_db_connection()
+    cursor=conn.cursor()
+    cursor.execute("DELETE FROM tasks WHERE id=?", (task_id,))
+    conn.commit()
+    conn.close()
+    return jsonify({"message": "Task deleted successfully"}), 200
+
+@app.route("/api/tasks/<int:task_id>", methods=["PUT"])
+def api_update_task(task_id):
+    data=request.get_json()
+    title=data.get("title")
+    description=data.get("description")
+    status=data.get("status")
+    conn=get_db_connection()
+    cursor=conn.cursor()
+    cursor.execute(
+        "UPDATE tasks SET title=?, description=?, status=? WHERE id=?", (title, description, status, task_id)
+    )
+    conn.commit()
+    conn.close()
+    return jsonify({"message": "Task updated successfully"}), 200
 
 if __name__=="__main__":
     app.run(debug=True)

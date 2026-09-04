@@ -1,21 +1,25 @@
 from flask import Flask, render_template,request,redirect,url_for,jsonify,session
 import sqlite3
 
+
 app=Flask(__name__)
 
 app.secret_key="super_secret_key"
 
 def get_db_connection():
     conn=sqlite3.connect("database.db")
-    conn.row_factory=sqlite3.Row
+    conn.row_factory=sqlite3.Row # Returns rows as dicts instead of tuples
     return conn
-def init_db():
+
+def init_db(): # Initialize the database (create tables if they don't exist)
     conn=get_db_connection()
     cursor=conn.cursor()
-    cursor.execute("CREATE TABLE IF NOT EXISTS USERS(id INTEGER PRIMARY KEY AUTOINCREMENT,name TEXT NOT NULL,email TEXT NOT NULL,PASSWOARD TEXT NOT NULL,dob TEXT NOT NULL,gender TEXT NOT NULL,courses TEXT NOT NULL)")
+    cursor.execute("CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT,name TEXT NOT NULL, email TEXT NOT NULL, password TEXT NOT NULL,dob TEXT NOT NULL,gender TEXT NOT NULL,courses TEXT NOT NULL)")
+    cursor.execute("CREATE TABLE IF NOT EXISTS tasks (id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT NOT NULL, description TEXT NOT NULL,  status TEXT NOT NULL)")
     conn.commit()
     conn.close()
 init_db()
+
 
 @app.route("/")
 def home():  
@@ -50,30 +54,31 @@ def api_register():
     email=data.get("email")
     conn=get_db_connection()
     cursor=conn.cursor()
-    cursor.execute("SELECT*FROM user WHERE email=?",(email,))
+    cursor.execute("SELECT * FROM users WHERE email=?", (email,))
     existing_user=cursor.fetchone()
     if existing_user:
         conn.close()
-        return jsonify({"message":"Email already registerd"}),400
-        name=data.get("name")
-        password=data.get("passwoard")
-        dob=data.get("dob")
-        gender=data.get("gender")
-        courses=data.get("courses")
-        conn=get_db_connection()
-        cursor=conn.cursor()
-        courses.execute("INSERT INTO users(name,mail,dob,gender,courses)VALUES (?, ?, ?, ?, ?, ?)", (name, email, password, dob, gender, courses))
-        conn.commit()
-        conn.close()
-        return jsonify({"message":"user registered sucessfully "}),201
-@app.route("/api/login",methods=["POST"])
+        return jsonify({"message": "Email already registered"}), 400
+    name=data.get("name")
+    password=data.get("password")
+    dob=data.get("dob")
+    gender=data.get("gender")
+    courses=data.get("courses")
+    conn=get_db_connection()
+    cursor=conn.cursor()
+    cursor.execute("INSERT INTO users (name, email, password, dob, gender, courses) VALUES (?, ?, ?, ?, ?, ?)", (name, email, password, dob, gender, courses))
+    conn.commit()
+    conn.close()
+    return jsonify({"message": "User registered successfully"}), 201
+
+@app.route("/api/login", methods=["POST"])
 def api_login():
     data=request.get_json()
     email=data.get("email")
-    passwoard=data.get("password")
+    password=data.get("password")
     conn=get_db_connection()
     cursor=conn.cursor()
-    cursor.execute("SELECT * FROM users WHERE email=? AND Password=?",(email,password))
+    cursor.execute("SELECT * FROM users WHERE email=? AND password=?", (email, password))
     user=cursor.fetchone()
     conn.close()
     if user:
@@ -83,8 +88,22 @@ def api_login():
         return jsonify({"message": "Login successful"}), 200
     else:
         return jsonify({"message": "Invalid email or password"}), 401
-    
-    
+        
+@app.route("/logout")
+def logout():
+    session.pop("user_id", None)
+    session.pop("user_name", None)
+    session.pop("user_email", None)
+    return redirect(url_for("login"))
+
+@app.route("/api/tasks", methods=["GET"])
+def api_tasks():
+    conn=get_db_connection()
+    cursor=conn.cursor()
+    cursor.execute("SELECT * FROM tasks")
+    tasks=cursor.fetchall()
+    conn.close()
+    return jsonify([dict(task) for task in tasks]), 200
 
 if __name__=="__main__":
     app.run(debug=True)

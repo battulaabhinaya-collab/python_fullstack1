@@ -54,7 +54,21 @@ if (loginForm) {
         if (email == "" || password == "") {
             alert("Please fill all the fields");
         } else {
-
+            fetch("/api/login", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    email: email,
+                    password: password
+                })
+            })
+                .then(response_=> response.json())
+                .then(data =>{
+                    alert(data.message);
+                    window.location.href="/";
+                });
             alert("Login successful");
         }
 

@@ -11,13 +11,18 @@
     <h1>courses in NRIIT Learning management system</h1>
     <p>learn practice get placed</p>
     <nav>
-        <a href="index.html">Home</a>
-        <a href="about.html">about</a>
-        <a href="contact.html">contact</a>
-        <a href="courses.html">courses</a>
-        <a href="login.html">login</a>
-        <a href="register.html">register</a>
-        <a href="trainers.html">trainers</a>
+        <a href="/">Home</a>
+        <a href="/about">About</a>
+        <a href="/contact">Contact</a>
+        <a href="/courses">Courses</a>
+        {% if session.get('user_id') % }
+        <p>Welcome, {{ session.get('user_name')}}!</p>
+        <a href="/logout">logout</a>
+        {% else %}
+        <a href="/login">Login</a>
+        <a href="/register">Register</a>
+        {% endif %}
+        <a href="/trainers">Trainers</a>
     </nav>
     <hr>
     </header>
